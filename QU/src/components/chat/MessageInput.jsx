@@ -1,6 +1,7 @@
 // filepath: /customer-support-portal/customer-support-portal/src/components/chat/MessageInput.jsx
 import React, { useState } from 'react';
 import { useChat } from '../../contexts/ChatContext';
+import styles from './MessageInput.module.css';
 
 const MessageInput = () => {
   const [text, setText] = useState('');
@@ -18,15 +19,20 @@ const MessageInput = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="message-input">
+    <form onSubmit={handleSubmit} className={styles.form}>
       <input
         type="text"
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Type your message..."
         disabled={loading}
+        className={styles.input}
       />
-      <button type="submit" disabled={loading || !text.trim()}>
+      <button 
+        type="submit" 
+        disabled={loading || !text.trim()} 
+        className={styles.button}
+      >
         Send
       </button>
     </form>

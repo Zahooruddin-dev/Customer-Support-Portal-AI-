@@ -1,15 +1,19 @@
 // filepath: /customer-support-portal/customer-support-portal/src/components/chat/MessageList.jsx
-import React, { useContext } from 'react';
-import { ChatContext } from '../../contexts/ChatContext';
+import React from 'react';
+import { useChat } from '../../contexts/ChatContext';
+import styles from './MessageList.module.css';
 
 const MessageList = () => {
-  const { messages } = useContext(ChatContext);
+  const { messages } = useChat();
 
   return (
-    <div className="message-list">
-      {messages.map((message, index) => (
-        <div key={index} className={`message ${message.sender}`}>
+    <div className={styles.messageList}>
+      {messages.map((message) => (
+        <div key={message.id} className={`${styles.message} ${styles[message.sender]}`}>
           <p>{message.text}</p>
+          <span className={styles.timestamp}>
+            {new Date(message.timestamp).toLocaleTimeString()}
+          </span>
         </div>
       ))}
     </div>

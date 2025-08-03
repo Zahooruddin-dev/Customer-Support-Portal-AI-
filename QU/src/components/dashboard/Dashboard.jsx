@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { storageService } from '../../services/localStorage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import TicketList from './TicketList';
 import Statistics from './Statistics';
 import styles from './Dashboard.module.css';
 
 const Dashboard = () => {
-  const [tickets, setTickets] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: tickets, loading, saveData: saveTickets } = useLocalStorage('tickets', []);
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -54,7 +53,7 @@ const Dashboard = () => {
         <Statistics tickets={tickets} />
       </div>
       <div className={styles.ticketList}>
-        <TicketList tickets={tickets} />
+        <TicketList tickets={tickets} onUpdateTicket={saveTickets} />
       </div>
     </div>
   );

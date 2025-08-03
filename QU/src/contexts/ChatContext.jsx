@@ -1,54 +1,56 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { storageService } from '../services/localStorage';
-import { useAuth } from '../hooks/useAuth';
+import React, { createContext, useState, useContext } from 'react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
-const ChatContext = createContext();
+export const ChatContext = createContext();
+
+export const useChat = () => {
+  const context = useContext(ChatContext);
+  if (!context) {
+    throw new Error('useChat must be used within a ChatProvider');
+  }
+  return context;
+};
 
 export const ChatProvider = ({ children }) => {
-  const [messages, setMessages] = useState([]);
+  const { data: messages, saveData: saveMessages } = useLocalStorage('messages', []);
   const [loading, setLoading] = useState(false);
-  const { currentUser } = useAuth();
 
-  useEffect(() => {
-    if (currentUser) {
-      const savedMessages = storageService.getItem(`chat_messages_${currentUser.id}`) || [];
-      setMessages(savedMessages);
+  const addMessage = async (message) => {
+    setLoading(true);
+    try {
+      const newMessage = {
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        sender: 'user',
+        ...message
+      };
+      const updatedMessages = [...messages, newMessage];
+      await saveMessages(updatedMessages);
+      
+      // Simulate AI response
+      const aiResponse = {
+        id: Date.now() + 1,
+        timestamp: new Date().toISOString(),
+        sender: 'ai',
+        text: `AI response to: ${message.text}`
+      };
+      await saveMessages([...updatedMessages, aiResponse]);
+    } catch (error) {
+      console.error('Error adding message:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [currentUser]);
-
-  const addMessage = (message) => {
-    const newMessage = {
-      id: Date.now(),
-      timestamp: new Date().toISOString(),
-      userId: currentUser.id,
-      ...message
-    };
-
-    setMessages(prevMessages => {
-      const updatedMessages = [...prevMessages, newMessage];
-      storageService.setItem(`chat_messages_${currentUser.id}`, updatedMessages);
-      return updatedMessages;
-    });
   };
 
-  const clearMessages = () => {
-    setMessages([]);
-    storageService.removeItem(`chat_messages_${currentUser.id}`);
+  const value = {
+    messages,
+    loading,
+    addMessage
   };
 
   return (
-    <ChatContext.Provider value={{ 
-      messages, 
-      loading, 
-      addMessage, 
-      clearMessages, 
-      setLoading 
-    }}>
+    <ChatContext.Provider value={value}>
       {children}
     </ChatContext.Provider>
   );
-};
-
-export const useChat = () => {
-  return useContext(ChatContext);
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
-import { useFirebase } from './useFirebase';
+import { useLocalStorage } from './useLocalStorage';
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -10,20 +10,32 @@ export const useAuth = () => {
   return context;
 };
 
+export const useAuthData = () => {
+  const { data: user, saveData: saveUser, removeData: removeUser } = useLocalStorage('user', null);
+  return { user, saveUser, removeUser };
+};
+
 const useProvideAuth = () => {
-  const { user, setUser } = useContext(AuthContext);
-  const { signInWithEmail, signOut, registerWithEmail } = useFirebase();
+  const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { saveData: saveUser, removeData: removeUser } = useLocalStorage('user', null);
 
   const login = async (email, password) => {
     setLoading(true);
     setError(null);
     try {
-      const userCredential = await signInWithEmail(email, password);
-      setUser(userCredential.user);
+      // Simulate authentication
+      const mockUser = {
+        id: Date.now(),
+        email,
+        createdAt: new Date().toISOString()
+      };
+      await saveUser(mockUser);
+      setUser(mockUser);
     } catch (err) {
-      setError(err.message);
+      setError('Failed to login');
+      throw new Error('Login failed');
     } finally {
       setLoading(false);
     }
@@ -33,10 +45,17 @@ const useProvideAuth = () => {
     setLoading(true);
     setError(null);
     try {
-      const userCredential = await registerWithEmail(email, password);
-      setUser(userCredential.user);
+      // Simulate registration
+      const mockUser = {
+        id: Date.now(),
+        email,
+        createdAt: new Date().toISOString()
+      };
+      await saveUser(mockUser);
+      setUser(mockUser);
     } catch (err) {
-      setError(err.message);
+      setError('Failed to register');
+      throw new Error('Registration failed');
     } finally {
       setLoading(false);
     }
@@ -46,17 +65,26 @@ const useProvideAuth = () => {
     setLoading(true);
     setError(null);
     try {
-      await signOut();
+      await removeUser();
       setUser(null);
     } catch (err) {
-      setError(err.message);
+      setError('Failed to logout');
+      throw new Error('Logout failed');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Optionally handle user state persistence here
+    // Check for existing user session on mount
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (err) {
+        console.error('Error parsing stored user:', err);
+      }
+    }
   }, []);
 
   return {
