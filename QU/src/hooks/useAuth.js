@@ -2,7 +2,15 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useFirebase } from './useFirebase';
 
-const useAuth = () => {
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+const useProvideAuth = () => {
   const { user, setUser } = useContext(AuthContext);
   const { signInWithEmail, signOut, registerWithEmail } = useFirebase();
   const [error, setError] = useState(null);
@@ -61,4 +69,4 @@ const useAuth = () => {
   };
 };
 
-export default useAuth;
+export default useProvideAuth;
