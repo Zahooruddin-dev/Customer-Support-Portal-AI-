@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useCallback } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
 export const ChatContext = createContext();
@@ -15,7 +15,7 @@ export const ChatProvider = ({ children }) => {
   const { data: messages, saveData: saveMessages } = useLocalStorage('messages', []);
   const [loading, setLoading] = useState(false);
 
-  const addMessage = async (message) => {
+  const addMessage = useCallback(async (message) => {
     setLoading(true);
     try {
       const newMessage = {
@@ -28,25 +28,27 @@ export const ChatProvider = ({ children }) => {
       await saveMessages(updatedMessages);
       
       // Simulate AI response
-      const aiResponse = {
-        id: Date.now() + 1,
-        timestamp: new Date().toISOString(),
-        sender: 'ai',
-        text: `AI response to: ${message.text}`
-      };
-      await saveMessages([...updatedMessages, aiResponse]);
+      setTimeout(async () => {
+        const aiResponse = {
+          id: Date.now() + 1,
+          timestamp: new Date().toISOString(),
+          sender: 'ai',
+          text: `AI response to: ${message.text}`
+        };
+        await saveMessages([...updatedMessages, aiResponse]);
+        setLoading(false);
+      }, 1000);
     } catch (error) {
       console.error('Error adding message:', error);
-    } finally {
       setLoading(false);
     }
-  };
+  }, [messages, saveMessages]);
 
-  const value = {
+  const value = React.useMemo(() => ({
     messages,
     loading,
     addMessage
-  };
+  }), [messages, loading, addMessage]);
 
   return (
     <ChatContext.Provider value={value}>

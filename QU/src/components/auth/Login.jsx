@@ -41,6 +41,7 @@ const Login = () => {
             required
             className={styles.input}
             disabled={loading}
+            autoComplete="username"
           />
         </div>
         <div className={styles.formGroup}>
@@ -52,6 +53,7 @@ const Login = () => {
             required
             className={styles.input}
             disabled={loading}
+            autoComplete="current-password"
           />
         </div>
         <button type="submit" className={styles.button} disabled={loading}>
