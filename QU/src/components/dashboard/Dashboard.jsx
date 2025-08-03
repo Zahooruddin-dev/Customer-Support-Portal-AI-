@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../../services/firebase';
 import { useAuth } from '../../hooks/useAuth';
+import { storageService } from '../../services/localStorage';
 import TicketList from './TicketList';
 import Statistics from './Statistics';
+import styles from './Dashboard.module.css';
 
 const Dashboard = () => {
   const [tickets, setTickets] = useState([]);
@@ -11,18 +11,13 @@ const Dashboard = () => {
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    const fetchTickets = async () => {
+    const fetchTickets = () => {
       try {
-        const ticketsRef = collection(db, 'tickets');
-        const q = query(ticketsRef, where('userId', '==', currentUser.uid));
-        const querySnapshot = await getDocs(q);
-        
-        const ticketData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        setTickets(ticketData);
+        const userTickets = storageService.getItem('tickets') || [];
+        const filteredTickets = userTickets.filter(
+          ticket => ticket.userId === currentUser.id
+        );
+        setTickets(filteredTickets);
       } catch (error) {
         console.error('Error fetching tickets:', error);
       } finally {
@@ -33,15 +28,34 @@ const Dashboard = () => {
     fetchTickets();
   }, [currentUser]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const addTicket = (ticketData) => {
+    const newTicket = {
+      id: Date.now(),
+      userId: currentUser.id,
+      createdAt: new Date().toISOString(),
+      status: 'open',
+      ...ticketData,
+    };
+
+    const existingTickets = storageService.getItem('tickets') || [];
+    const updatedTickets = [...existingTickets, newTicket];
+    storageService.setItem('tickets', updatedTickets);
+    setTickets(prev => [...prev, newTicket]);
+  };
+
+  if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="dashboard">
-      <h1>Dashboard</h1>
-      <Statistics tickets={tickets} />
-      <TicketList tickets={tickets} />
+    <div className={styles.dashboardContainer}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>Dashboard</h1>
+      </header>
+      <div className={styles.statsContainer}>
+        <Statistics tickets={tickets} />
+      </div>
+      <div className={styles.ticketList}>
+        <TicketList tickets={tickets} />
+      </div>
     </div>
   );
 };

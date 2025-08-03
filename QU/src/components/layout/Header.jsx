@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import styles from './Header.module.css';
 
 const Header = () => {
   const toggleTheme = () => {
@@ -7,23 +8,25 @@ const Header = () => {
   };
 
   return (
-    <header className="header">
-      <nav>
-        <ul>
+    <header className={styles.header}>
+      <nav className={styles.nav}>
+        <ul className={styles.navList}>
           <li>
-            <Link to="/">Home</Link>
+            <Link to="/" className={styles.navLink}>Home</Link>
           </li>
           <li>
-            <Link to="/login">Login</Link>
+            <Link to="/login" className={styles.navLink}>Login</Link>
           </li>
           <li>
-            <Link to="/register">Register</Link>
+            <Link to="/register" className={styles.navLink}>Register</Link>
           </li>
           <li>
-            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/dashboard" className={styles.navLink}>Dashboard</Link>
           </li>
           <li>
-            <button onClick={toggleTheme}>Toggle Theme</button>
+            <button onClick={toggleTheme} className={styles.themeButton}>
+              Toggle Theme
+            </button>
           </li>
         </ul>
       </nav>

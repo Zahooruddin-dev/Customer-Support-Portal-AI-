@@ -1,16 +1,19 @@
 // filepath: /customer-support-portal/customer-support-portal/src/components/chat/MessageInput.jsx
-import React, { useState, useContext } from 'react';
-import { ChatContext } from '../../contexts/ChatContext';
+import React, { useState } from 'react';
+import { useChat } from '../../contexts/ChatContext';
 
 const MessageInput = () => {
-  const [message, setMessage] = useState('');
-  const { sendMessage } = useContext(ChatContext);
+  const [text, setText] = useState('');
+  const { addMessage, loading } = useChat();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (message.trim()) {
-      sendMessage(message);
-      setMessage('');
+    if (text.trim() && !loading) {
+      addMessage({
+        text: text.trim(),
+        type: 'user'
+      });
+      setText('');
     }
   };
 
@@ -18,12 +21,14 @@ const MessageInput = () => {
     <form onSubmit={handleSubmit} className="message-input">
       <input
         type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
         placeholder="Type your message..."
-        className="input-field"
+        disabled={loading}
       />
-      <button type="submit" className="send-button">Send</button>
+      <button type="submit" disabled={loading || !text.trim()}>
+        Send
+      </button>
     </form>
   );
 };

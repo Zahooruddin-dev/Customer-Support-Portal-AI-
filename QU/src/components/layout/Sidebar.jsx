@@ -1,23 +1,24 @@
 // filepath: /customer-support-portal/customer-support-portal/src/components/layout/Sidebar.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import styles from './Sidebar.module.css';
 
 const Sidebar = () => {
   return (
-    <aside className="sidebar">
-      <nav>
+    <aside className={styles.sidebar}>
+      <nav className={styles.nav}>
         <ul>
-          <li>
-            <Link to="/dashboard">Dashboard</Link>
+          <li className={styles.navItem}>
+            <Link to="/dashboard" className={styles.navLink}>Dashboard</Link>
           </li>
-          <li>
-            <Link to="/chat">Chat</Link>
+          <li className={styles.navItem}>
+            <Link to="/chat" className={styles.navLink}>Chat</Link>
           </li>
-          <li>
-            <Link to="/tickets">My Tickets</Link>
+          <li className={styles.navItem}>
+            <Link to="/tickets" className={styles.navLink}>My Tickets</Link>
           </li>
-          <li>
-            <Link to="/profile">Profile</Link>
+          <li className={styles.navItem}>
+            <Link to="/profile" className={styles.navLink}>Profile</Link>
           </li>
         </ul>
       </nav>

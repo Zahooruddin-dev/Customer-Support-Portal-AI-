@@ -1,11 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { auth } from '../services/firebase';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut,
-  onAuthStateChanged 
-} from 'firebase/auth';
+import { storageService } from '../services/localStorage';
 
 export const AuthContext = createContext();
 
@@ -13,26 +7,40 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const register = (email, password) => {
-    return createUserWithEmailAndPassword(auth, email, password);
+  useEffect(() => {
+    const user = storageService.getItem('user');
+    setCurrentUser(user);
+    setLoading(false);
+  }, []);
+
+  const register = async (email, password) => {
+    try {
+      // Simulate user registration
+      const newUser = { id: Date.now(), email };
+      storageService.setItem('user', newUser);
+      setCurrentUser(newUser);
+      return newUser;
+    } catch (error) {
+      throw new Error('Registration failed');
+    }
   };
 
-  const login = (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password);
+  const login = async (email, password) => {
+    try {
+      // Simulate authentication
+      const user = { id: Date.now(), email };
+      storageService.setItem('user', user);
+      setCurrentUser(user);
+      return user;
+    } catch (error) {
+      throw new Error('Login failed');
+    }
   };
 
   const logout = () => {
-    return signOut(auth);
+    storageService.removeItem('user');
+    setCurrentUser(null);
   };
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
 
   const value = {
     currentUser,
